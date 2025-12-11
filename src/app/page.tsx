@@ -1,65 +1,189 @@
-import Image from "next/image";
+"use client";
+
+import { useCallback, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Header, Navigation, DropZone } from "@/components/layout";
+import {
+  OverviewView,
+  SessionsView,
+  ErrorsView,
+  InventoryView,
+  NetworkView,
+  MatchingView,
+  QuestsView,
+  RawDataView,
+} from "@/components/views";
+import { useLogImport } from "@/hooks/useLogImport";
+import { useStore, type TabId } from "@/state";
 
 export default function Home() {
+  const {
+    progress,
+    parsedResults,
+    insights,
+    importFiles,
+    importFromDirectory,
+    importFromFileInput,
+    reset,
+    onDrop,
+    isLoading,
+    hasData,
+    errorMessage,
+  } = useLogImport();
+
+  const activeTab = useStore((state) => state.activeTab);
+  const setActiveTab = useStore((state) => state.setActiveTab);
+
+  // Update store when data changes
+  const setParsedResults = useStore((state) => state.setParsedResults);
+  const setInsights = useStore((state) => state.setInsights);
+  const setImportProgress = useStore((state) => state.setImportProgress);
+
+  // Sync parsed results into store
+  useEffect(() => {
+    if (parsedResults.length > 0) {
+      setParsedResults(parsedResults);
+    }
+  }, [parsedResults, setParsedResults]);
+
+  // Sync insights into store
+  useEffect(() => {
+    if (insights) {
+      setInsights(insights);
+    }
+  }, [insights, setInsights]);
+
+  // Sync progress into store (optional UI consumers)
+  useEffect(() => {
+    setImportProgress(progress);
+  }, [progress, setImportProgress]);
+
+  const handleExport = useCallback(() => {
+    if (!insights) return;
+    const data = { insights, parsedResults };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `tarkov-stats-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [insights, parsedResults]);
+
+  const handleReset = useCallback(() => {
+    reset();
+    useStore.getState().clearData();
+  }, [reset]);
+
+  const renderTabContent = () => {
+    if (!insights) return null;
+
+    switch (activeTab) {
+      case "overview":
+        return <OverviewView insights={insights} parsedResults={parsedResults} />;
+      case "sessions":
+        return <SessionsView sessions={insights.timelines} />;
+      case "errors":
+        return <ErrorsView errors={insights.errors} />;
+      case "inventory":
+        return <InventoryView inventory={insights.inventory} />;
+      case "network":
+        return <NetworkView connectivity={insights.connectivity} />;
+      case "matching":
+        return <MatchingView insights={insights} />;
+      case "quests":
+        return <QuestsView quests={insights.quests} />;
+      case "raw":
+        return <RawDataView insights={insights} parsedResults={parsedResults} />;
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className="min-h-screen flex flex-col">
+      <Header onExport={handleExport} onReset={handleReset} />
+
+      <main className="flex-1 max-w-[1600px] mx-auto w-full px-4 md:px-6 py-6 md:py-8">
+        {/* Drop Zone - Always visible when no data or loading */}
+        <AnimatePresence mode="wait">
+          {(!hasData || isLoading) && (
+            <motion.div
+              key="dropzone"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              <DropZone
+                progress={progress}
+                onDrop={onDrop}
+                onSelectFolder={importFromDirectory}
+                onSelectFiles={importFromFileInput}
+                errorMessage={errorMessage}
+              />
+
+              {!isLoading && !hasData && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                  className="mt-16 text-center"
+                >
+                  <h2 className="text-xl font-semibold text-zinc-300 mb-3">
+                    Ready to analyze your Tarkov logs
+                  </h2>
+                  <p className="text-zinc-500 max-w-lg mx-auto">
+                    Import your log files to see detailed statistics about your sessions,
+                    errors, inventory operations, network connectivity, matchmaking times,
+                    and quest progress.
+                  </p>
+                </motion.div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Dashboard Content */}
+        <AnimatePresence mode="wait">
+          {hasData && insights && !isLoading && (
+            <motion.div
+              key="dashboard"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="space-y-6"
             >
-              Learning
-            </a>{" "}
-            center.
+              {/* Navigation */}
+              <Navigation />
+
+              {/* Tab Content */}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeTab}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {renderTabContent()}
+                </motion.div>
+              </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t border-zinc-800/50 py-4 mt-auto">
+        <div className="max-w-[1600px] mx-auto px-4 md:px-6 flex flex-col md:flex-row items-center justify-between gap-2 text-sm text-zinc-500">
+          <p>
+            All log parsing happens locally in your browser. No data is sent to any server.
+          </p>
+          <p>
+            Built with TarkovLogsLib
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </footer>
     </div>
   );
 }

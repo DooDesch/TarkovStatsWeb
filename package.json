@@ -9,9 +9,18 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@tanstack/react-virtual": "^3.13.13",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.23.26",
+    "immer": "^11.0.1",
+    "lucide-react": "^0.560.0",
     "next": "16.0.8",
     "react": "19.2.1",
-    "react-dom": "19.2.1"
+    "react-dom": "19.2.1",
+    "react-dropzone": "^14.3.8",
+    "recharts": "^3.5.1",
+    "tarkov-logs-lib": "file:../TarkovLogsLib",
+    "zustand": "^5.0.9"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
