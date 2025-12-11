@@ -39,8 +39,8 @@ importers:
         specifier: ^3.5.1
         version: 3.5.1(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react-is@16.13.1)(react@19.2.1)(redux@5.0.1)
       tarkov-logs-lib:
-        specifier: file:../TarkovLogsLib
-        version: file:../TarkovLogsLib
+        specifier: github:DooDesch/TarkovLogsLib
+        version: https://codeload.github.com/DooDesch/TarkovLogsLib/tar.gz/20624298ef0081abcd73929a4a453937d8346b56
       zustand:
         specifier: ^5.0.9
         version: 5.0.9(@types/react@19.2.7)(immer@11.0.1)(react@19.2.1)(use-sync-external-store@1.6.0(react@19.2.1))
@@ -2040,8 +2040,9 @@ packages:
     resolution: {integrity: sha512-g9ljZiwki/LfxmQADO3dEY1CbpmXT5Hm2fJ+QaGKwSXUylMybePR7/67YW7jOrrvjEgL1Fmz5kzyAjWVWLlucg==}
     engines: {node: '>=6'}
 
-  tarkov-logs-lib@file:../TarkovLogsLib:
-    resolution: {directory: ../TarkovLogsLib, type: directory}
+  tarkov-logs-lib@https://codeload.github.com/DooDesch/TarkovLogsLib/tar.gz/20624298ef0081abcd73929a4a453937d8346b56:
+    resolution: {tarball: https://codeload.github.com/DooDesch/TarkovLogsLib/tar.gz/20624298ef0081abcd73929a4a453937d8346b56}
+    version: 1.0.0
     engines: {node: '>=18'}
 
   tiny-invariant@1.3.3:
@@ -4311,7 +4312,7 @@ snapshots:
 
   tapable@2.3.0: {}
 
-  tarkov-logs-lib@file:../TarkovLogsLib:
+  tarkov-logs-lib@https://codeload.github.com/DooDesch/TarkovLogsLib/tar.gz/20624298ef0081abcd73929a4a453937d8346b56:
     dependencies:
       glob: 13.0.0
 
