@@ -80,62 +80,66 @@ export function MatchingView({ insights }: MatchingViewProps) {
       {/* Match Time Chart */}
       {matchData.length > 0 && (
         <ChartContainer title="Matchmaking Duration Over Time" height={280}>
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={matchData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
-              <XAxis dataKey="label" stroke="#71717a" tick={{ fontSize: 11 }} />
-              <YAxis stroke="#71717a" unit="s" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#18181b",
-                  border: "1px solid #3f3f46",
-                  borderRadius: "8px",
-                }}
-                formatter={(value: number) => [`${value.toFixed(1)}s`, "Match Time"]}
-              />
-              <Legend />
-              <Line
-                type="monotone"
-                dataKey="durationSec"
-                stroke="#f59e0b"
-                strokeWidth={2}
-                dot={{ fill: "#f59e0b", strokeWidth: 0, r: 4 }}
-                activeDot={{ r: 6, fill: "#f59e0b" }}
-                name="Match Time"
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          <div className="w-full h-full min-h-[240px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={matchData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                <XAxis dataKey="label" stroke="#71717a" tick={{ fontSize: 11 }} />
+                <YAxis stroke="#71717a" unit="s" />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#18181b",
+                    border: "1px solid #3f3f46",
+                    borderRadius: "8px",
+                  }}
+                  formatter={(value: number) => [`${value.toFixed(1)}s`, "Match Time"]}
+                />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="durationSec"
+                  stroke="#f59e0b"
+                  strokeWidth={2}
+                  dot={{ fill: "#f59e0b", strokeWidth: 0, r: 4 }}
+                  activeDot={{ r: 6, fill: "#f59e0b" }}
+                  name="Match Time"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
         </ChartContainer>
       )}
 
       {/* Startup Time Chart */}
       {startupData.length > 0 && (
         <ChartContainer title="Startup Duration Over Time" height={280}>
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={startupData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
-              <XAxis dataKey="label" stroke="#71717a" tick={{ fontSize: 11 }} />
-              <YAxis stroke="#71717a" unit="s" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#18181b",
-                  border: "1px solid #3f3f46",
-                  borderRadius: "8px",
-                }}
-                formatter={(value: number) => [`${value.toFixed(1)}s`, "Startup Time"]}
-              />
-              <Legend />
-              <Line
-                type="monotone"
-                dataKey="durationSec"
-                stroke="#22c55e"
-                strokeWidth={2}
-                dot={{ fill: "#22c55e", strokeWidth: 0, r: 4 }}
-                activeDot={{ r: 6, fill: "#22c55e" }}
-                name="Startup Time"
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          <div className="w-full h-full min-h-[240px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={startupData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                <XAxis dataKey="label" stroke="#71717a" tick={{ fontSize: 11 }} />
+                <YAxis stroke="#71717a" unit="s" />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#18181b",
+                    border: "1px solid #3f3f46",
+                    borderRadius: "8px",
+                  }}
+                  formatter={(value: number) => [`${value.toFixed(1)}s`, "Startup Time"]}
+                />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="durationSec"
+                  stroke="#22c55e"
+                  strokeWidth={2}
+                  dot={{ fill: "#22c55e", strokeWidth: 0, r: 4 }}
+                  activeDot={{ r: 6, fill: "#22c55e" }}
+                  name="Startup Time"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
         </ChartContainer>
       )}
 
