@@ -9,4 +9,6 @@ export { InventoryView, type InventoryViewProps } from "./InventoryView";
 export { NetworkView, type NetworkViewProps } from "./NetworkView";
 export { MatchingView, type MatchingViewProps } from "./MatchingView";
 export { QuestsView, type QuestsViewProps } from "./QuestsView";
+export { BackendView, type BackendViewProps } from "./BackendView";
+export { AudioView, type AudioViewProps } from "./AudioView";
 export { RawDataView, type RawDataViewProps } from "./RawDataView";

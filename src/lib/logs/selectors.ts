@@ -34,7 +34,10 @@ export function filterSessions(
     // Date range filter
     if (filter.dateRange && session.startedAt) {
       const sessionDate = new Date(session.startedAt);
-      if (sessionDate < filter.dateRange.start || sessionDate > filter.dateRange.end) {
+      if (
+        sessionDate < filter.dateRange.start ||
+        sessionDate > filter.dateRange.end
+      ) {
         return false;
       }
     }
@@ -47,14 +50,24 @@ export function filterSessions(
     }
 
     // Duration filters
-    const duration = session.startedAt && session.endedAt
-      ? new Date(session.endedAt).getTime() - new Date(session.startedAt).getTime()
-      : null;
+    const duration =
+      session.startedAt && session.endedAt
+        ? new Date(session.endedAt).getTime() -
+          new Date(session.startedAt).getTime()
+        : null;
 
-    if (filter.minDurationMs != null && duration != null && duration < filter.minDurationMs) {
+    if (
+      filter.minDurationMs != null &&
+      duration != null &&
+      duration < filter.minDurationMs
+    ) {
       return false;
     }
-    if (filter.maxDurationMs != null && duration != null && duration > filter.maxDurationMs) {
+    if (
+      filter.maxDurationMs != null &&
+      duration != null &&
+      duration > filter.maxDurationMs
+    ) {
       return false;
     }
 
@@ -65,7 +78,10 @@ export function filterSessions(
 /**
  * Sort sessions by start time (most recent first)
  */
-export function sortSessionsByDate(sessions: SessionTimeline[], ascending = false): SessionTimeline[] {
+export function sortSessionsByDate(
+  sessions: SessionTimeline[],
+  ascending = false
+): SessionTimeline[] {
   return [...sessions].sort((a, b) => {
     const aTime = a.startedAt ? new Date(a.startedAt).getTime() : 0;
     const bTime = b.startedAt ? new Date(b.startedAt).getTime() : 0;
@@ -89,7 +105,9 @@ export function getUniqueBuildVersions(sessions: SessionTimeline[]): string[] {
  */
 export function getSessionDuration(session: SessionTimeline): number | null {
   if (!session.startedAt || !session.endedAt) return null;
-  return new Date(session.endedAt).getTime() - new Date(session.startedAt).getTime();
+  return (
+    new Date(session.endedAt).getTime() - new Date(session.startedAt).getTime()
+  );
 }
 
 // ============================================================================
@@ -97,17 +115,45 @@ export function getSessionDuration(session: SessionTimeline): number | null {
 // ============================================================================
 
 /**
+ * Resolve a quest's effective status using fallbacks.
+ */
+export function resolveQuestStatus(
+  quest: QuestInsight
+): QuestInsight["status"] {
+  if (
+    quest.status === "completed" ||
+    quest.status === "failed" ||
+    quest.status === "started"
+  ) {
+    return quest.status;
+  }
+  if (quest.completedAt) return "completed";
+  if (quest.failedAt) return "failed";
+  if (quest.relatedEvents?.length) return "started";
+  return "unknown";
+}
+
+/**
  * Filter quests by criteria
  */
-export function filterQuests(quests: QuestInsight[], filter: QuestFilter): QuestInsight[] {
+export function filterQuests(
+  quests: QuestInsight[],
+  filter: QuestFilter
+): QuestInsight[] {
   return quests.filter((quest) => {
+    const status = resolveQuestStatus(quest);
+
     // Status filter
-    if (filter.status?.length && !filter.status.includes(quest.status)) {
+    if (filter.status?.length && !filter.status.includes(status)) {
       return false;
     }
 
     // Trader filter
-    if (filter.traderIds?.length && quest.traderId && !filter.traderIds.includes(quest.traderId)) {
+    if (
+      filter.traderIds?.length &&
+      quest.traderId &&
+      !filter.traderIds.includes(quest.traderId)
+    ) {
       return false;
     }
 
@@ -130,19 +176,22 @@ export function filterQuests(quests: QuestInsight[], filter: QuestFilter): Quest
  * Get quest stats by status
  */
 export function getQuestStats(quests: QuestInsight[]) {
+  const statuses = quests.map((q) => resolveQuestStatus(q));
   return {
     total: quests.length,
-    started: quests.filter((q) => q.status === "started").length,
-    completed: quests.filter((q) => q.status === "completed").length,
-    failed: quests.filter((q) => q.status === "failed").length,
-    unknown: quests.filter((q) => q.status === "unknown").length,
+    started: statuses.filter((s) => s === "started").length,
+    completed: statuses.filter((s) => s === "completed").length,
+    failed: statuses.filter((s) => s === "failed").length,
+    unknown: statuses.filter((s) => s === "unknown").length,
   };
 }
 
 /**
  * Get unique trader IDs/names from quests
  */
-export function getUniqueTraders(quests: QuestInsight[]): Array<{ id: string; name?: string }> {
+export function getUniqueTraders(
+  quests: QuestInsight[]
+): Array<{ id: string; name?: string }> {
   const traders = new Map<string, string | undefined>();
   quests.forEach((q) => {
     if (q.traderId) {
@@ -159,7 +208,10 @@ export function getUniqueTraders(quests: QuestInsight[]): Array<{ id: string; na
 /**
  * Get top N error families by count
  */
-export function getTopErrorFamilies(errors: ErrorInsight, topN = 10): Array<{ family: string; count: number }> {
+export function getTopErrorFamilies(
+  errors: ErrorInsight,
+  topN = 10
+): Array<{ family: string; count: number }> {
   return Object.entries(errors.byFamily)
     .map(([family, count]) => ({ family, count }))
     .sort((a, b) => b.count - a.count)
@@ -169,9 +221,11 @@ export function getTopErrorFamilies(errors: ErrorInsight, topN = 10): Array<{ fa
 /**
  * Get error percentage by family
  */
-export function getErrorPercentages(errors: ErrorInsight): Array<{ family: string; count: number; percentage: number }> {
+export function getErrorPercentages(
+  errors: ErrorInsight
+): Array<{ family: string; count: number; percentage: number }> {
   if (errors.total === 0) return [];
-  
+
   return Object.entries(errors.byFamily)
     .map(([family, count]) => ({
       family,
@@ -188,7 +242,10 @@ export function getErrorPercentages(errors: ErrorInsight): Array<{ family: strin
 /**
  * Get top N inventory operations by rejection count
  */
-export function getTopInventoryOperations(inventory: InventoryInsight, topN = 10): Array<{ operation: string; count: number }> {
+export function getTopInventoryOperations(
+  inventory: InventoryInsight,
+  topN = 10
+): Array<{ operation: string; count: number }> {
   return Object.entries(inventory.byOperation)
     .map(([operation, count]) => ({ operation, count }))
     .sort((a, b) => b.count - a.count)
@@ -198,7 +255,10 @@ export function getTopInventoryOperations(inventory: InventoryInsight, topN = 10
 /**
  * Get top N inventory error codes
  */
-export function getTopInventoryCodes(inventory: InventoryInsight, topN = 10): Array<{ code: string; count: number }> {
+export function getTopInventoryCodes(
+  inventory: InventoryInsight,
+  topN = 10
+): Array<{ code: string; count: number }> {
   return Object.entries(inventory.byCode)
     .map(([code, count]) => ({ code, count }))
     .sort((a, b) => b.count - a.count)
@@ -212,7 +272,9 @@ export function getTopInventoryCodes(inventory: InventoryInsight, topN = 10): Ar
 /**
  * Calculate connection success rate
  */
-export function getConnectionSuccessRate(connectivity: ConnectivityInsight): number {
+export function getConnectionSuccessRate(
+  connectivity: ConnectivityInsight
+): number {
   const total = connectivity.totalConnections + connectivity.totalTimeouts;
   if (total === 0) return 100;
   return (connectivity.totalConnections / total) * 100;
@@ -224,7 +286,12 @@ export function getConnectionSuccessRate(connectivity: ConnectivityInsight): num
 export function getTopAddresses(
   connectivity: ConnectivityInsight,
   topN = 15
-): Array<{ address: string; connections: number; timeouts: number; rate: number }> {
+): Array<{
+  address: string;
+  connections: number;
+  timeouts: number;
+  rate: number;
+}> {
   return Object.entries(connectivity.byAddress)
     .map(([address, stats]) => {
       const total = stats.connect + stats.timeout;
@@ -235,7 +302,7 @@ export function getTopAddresses(
         rate: total > 0 ? (stats.connect / total) * 100 : 100,
       };
     })
-    .sort((a, b) => (b.connections + b.timeouts) - (a.connections + a.timeouts))
+    .sort((a, b) => b.connections + b.timeouts - (a.connections + a.timeouts))
     .slice(0, topN);
 }
 
@@ -246,7 +313,14 @@ export function getTopAddresses(
 /**
  * Get matching time data for charts
  */
-export function getMatchingTimeData(insights: Insights): Array<{ time: number; label: string; durationSec: number; sessionId: string }> {
+export function getMatchingTimeData(
+  insights: Insights
+): Array<{
+  time: number;
+  label: string;
+  durationSec: number;
+  sessionId: string;
+}> {
   return insights.matching.sessions
     .filter((s) => s.durationMs != null && s.startedAt)
     .map((s) => ({
@@ -261,7 +335,14 @@ export function getMatchingTimeData(insights: Insights): Array<{ time: number; l
 /**
  * Get startup time data for charts
  */
-export function getStartupTimeData(insights: Insights): Array<{ time: number; label: string; durationSec: number; sessionId: string }> {
+export function getStartupTimeData(
+  insights: Insights
+): Array<{
+  time: number;
+  label: string;
+  durationSec: number;
+  sessionId: string;
+}> {
   return insights.startup.sessions
     .filter((s) => s.durationMs != null && s.startedAt)
     .map((s) => ({
@@ -293,11 +374,11 @@ export function bucketByTime(
   );
 
   const buckets = new Map<number, { count: number; value: number }>();
-  
+
   sorted.forEach((event) => {
     const time = new Date(event.timestamp).getTime();
     const bucketKey = Math.floor(time / intervalMs) * intervalMs;
-    
+
     const existing = buckets.get(bucketKey) || { count: 0, value: 0 };
     existing.count++;
     if (valueExtractor) {
@@ -350,7 +431,7 @@ export function downsampleData<T extends { x: number; y: number }>(
     // Find point in current bucket that creates largest triangle
     const rangeStart = Math.floor(i * bucketSize) + 1;
     const rangeEnd = Math.floor((i + 1) * bucketSize) + 1;
-    
+
     let maxArea = -1;
     let maxAreaPoint = data[rangeStart];
     const prevPoint = result[result.length - 1];
@@ -358,7 +439,7 @@ export function downsampleData<T extends { x: number; y: number }>(
     for (let j = rangeStart; j < rangeEnd; j++) {
       const area = Math.abs(
         (prevPoint.x - avgX) * (data[j].y - prevPoint.y) -
-        (prevPoint.x - data[j].x) * (avgY - prevPoint.y)
+          (prevPoint.x - data[j].x) * (avgY - prevPoint.y)
       );
       if (area > maxArea) {
         maxArea = area;
@@ -410,7 +491,9 @@ export function getUniqueLogTypes(results: ParsedLogResult[]): string[] {
 /**
  * Group results by log type
  */
-export function groupResultsByLogType(results: ParsedLogResult[]): Map<string, ParsedLogResult[]> {
+export function groupResultsByLogType(
+  results: ParsedLogResult[]
+): Map<string, ParsedLogResult[]> {
   const grouped = new Map<string, ParsedLogResult[]>();
   results.forEach((r) => {
     const existing = grouped.get(r.logType) || [];
@@ -423,7 +506,9 @@ export function groupResultsByLogType(results: ParsedLogResult[]): Map<string, P
 /**
  * Get event count by log type
  */
-export function getEventCountByLogType(results: ParsedLogResult[]): Record<string, number> {
+export function getEventCountByLogType(
+  results: ParsedLogResult[]
+): Record<string, number> {
   const counts: Record<string, number> = {};
   results.forEach((r) => {
     counts[r.logType] = (counts[r.logType] || 0) + r.events.length;

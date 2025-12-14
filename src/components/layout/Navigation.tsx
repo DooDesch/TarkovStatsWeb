@@ -10,6 +10,8 @@ import {
   Wifi,
   Crosshair,
   ScrollText,
+  Server,
+  Volume2,
   Database,
   type LucideIcon,
 } from "lucide-react";
@@ -30,6 +32,8 @@ const navItems: NavItem[] = [
   { id: "network", label: "Network", shortLabel: "Network", icon: Wifi },
   { id: "matching", label: "Matchmaking", shortLabel: "Match", icon: Crosshair },
   { id: "quests", label: "Quests", shortLabel: "Quests", icon: ScrollText },
+  { id: "backend", label: "Backend", shortLabel: "Backend", icon: Server },
+  { id: "audio", label: "Audio & Push", shortLabel: "Audio", icon: Volume2 },
   { id: "raw", label: "Raw Data", shortLabel: "Raw", icon: Database },
 ];
 

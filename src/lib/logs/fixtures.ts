@@ -8,6 +8,7 @@ import type {
   ParsedLogResult,
   SessionTimeline,
   QuestInsight,
+  Statistics,
 } from "./types";
 
 // ============================================================================
@@ -306,3 +307,169 @@ export const emptyInsights: Insights = {
 };
 
 export const emptyParsedResults: ParsedLogResult[] = [];
+
+// ============================================================================
+// Sample Statistics
+// ============================================================================
+
+export const sampleStatistics: Statistics = {
+  sessions: [
+    {
+      id: "session-001",
+      buildVersion: "0.15.5.1",
+      earliestTimestamp: new Date(Date.now() - 3600000).toISOString(),
+      latestTimestamp: new Date(Date.now() - 1800000).toISOString(),
+      logTypes: ["application", "backend", "errors", "inventory", "network-connection"],
+      totals: { events: 1250, errors: 15, warnings: 42 },
+    },
+    {
+      id: "session-002",
+      buildVersion: "0.15.5.1",
+      earliestTimestamp: new Date(Date.now() - 86400000).toISOString(),
+      latestTimestamp: new Date(Date.now() - 82800000).toISOString(),
+      logTypes: ["application", "backend", "network-connection"],
+      totals: { events: 980, errors: 8, warnings: 27 },
+    },
+  ],
+  backend: {
+    totalRequests: 245,
+    totalResponses: 240,
+    totalErrors: 5,
+    retries: 12,
+    byStatusCode: { "200": 230, "500": 5, "503": 5 },
+    byEndpoint: {
+      "/client/game/start": 45,
+      "/client/items": 38,
+      "/client/trading/api/getTradersList": 32,
+    },
+  },
+  cache: {
+    hits: 156,
+    misses: 89,
+  },
+  inventory: {
+    totalRejections: 23,
+    byOperation: { Move: 12, Split: 6, Merge: 3, Fold: 2 },
+    byCode: { "226": 10, "228": 8, "230": 5 },
+    items: { "5447a9cd4bdc2dbd208b4567": 5, "5447ac644bdc2d6c208b4567": 3 },
+  },
+  network: {
+    connections: 156,
+    disconnects: 12,
+    timeouts: 8,
+    byAddress: {
+      "185.128.24.12:17000": { connect: 45, disconnect: 3, timeout: 2 },
+      "185.128.24.15:17000": { connect: 38, disconnect: 2, timeout: 1 },
+    },
+    metrics: {
+      samples: 450,
+      rpiAvg: 42.5,
+      ludAvg: 15.2,
+      rttSamples: 120,
+      rttAvg: 65.3,
+      totalPacketsLost: 42,
+      totalPacketsSent: 125000,
+      totalPacketsReceived: 118000,
+    },
+  },
+  push: {
+    connections: 12,
+    drops: 2,
+    notifications: 89,
+  },
+  audio: {
+    initSuccess: 3,
+    occlusionErrors: 5,
+  },
+  errors: {
+    totals: 42,
+    byFamily: {
+      null_reference: 15,
+      key_not_found: 12,
+      mip_timeout: 8,
+      other: 7,
+    },
+  },
+  matchmaking: {
+    groupIds: ["group-001", "group-002"],
+    events: [],
+  },
+  anticheat: {
+    initLines: 24,
+    errors: 0,
+    lastStatus: "BattlEye initialized successfully",
+  },
+  quests: [
+    {
+      id: "5936d90786f7742b1420ba5b",
+      name: "Debut",
+      traderId: "54cb50c76803fa8b248b4571",
+      traderName: "Prapor",
+      status: "completed",
+      relatedEvents: [],
+      rewardRubles: 15000,
+      rewardItems: { "5449016a4bdc2d6f028b456f": 2 },
+    },
+  ],
+  traders: {
+    "54cb50c76803fa8b248b4571": { id: "54cb50c76803fa8b248b4571", name: "Prapor", kind: "trader" },
+    "5935c25fb3acc3127c3d8cd9": { id: "5935c25fb3acc3127c3d8cd9", name: "Peacekeeper", kind: "trader" },
+  },
+  items: {
+    "5447a9cd4bdc2dbd208b4567": { id: "5447a9cd4bdc2dbd208b4567", name: "M4A1", kind: "item" },
+    "5447ac644bdc2d6c208b4567": { id: "5447ac644bdc2d6c208b4567", name: "AK-74M", kind: "item" },
+  },
+};
+
+export const emptyStatistics: Statistics = {
+  sessions: [],
+  backend: {
+    totalRequests: 0,
+    totalResponses: 0,
+    totalErrors: 0,
+    retries: 0,
+    byStatusCode: {},
+    byEndpoint: {},
+  },
+  cache: {
+    hits: 0,
+    misses: 0,
+  },
+  inventory: {
+    totalRejections: 0,
+    byOperation: {},
+    byCode: {},
+    items: {},
+  },
+  network: {
+    connections: 0,
+    disconnects: 0,
+    timeouts: 0,
+    byAddress: {},
+    metrics: { samples: 0 },
+  },
+  push: {
+    connections: 0,
+    drops: 0,
+    notifications: 0,
+  },
+  audio: {
+    initSuccess: 0,
+    occlusionErrors: 0,
+  },
+  errors: {
+    totals: 0,
+    byFamily: {},
+  },
+  matchmaking: {
+    groupIds: [],
+    events: [],
+  },
+  anticheat: {
+    initLines: 0,
+    errors: 0,
+  },
+  quests: [],
+  traders: {},
+  items: {},
+};

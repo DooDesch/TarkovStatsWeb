@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { ScrollText, Search, Filter } from "lucide-react";
 import { StatCard, Card, Badge, EmptyState, Button } from "@/components/ui";
 import type { QuestInsight } from "@/lib/logs/types";
-import { filterQuests, getQuestStats, getUniqueTraders } from "@/lib/logs/selectors";
+import { filterQuests, getQuestStats, getUniqueTraders, resolveQuestStatus } from "@/lib/logs/selectors";
 
 export interface QuestsViewProps {
   quests: QuestInsight[];

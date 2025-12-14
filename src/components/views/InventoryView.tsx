@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Package, CheckCircle2 } from "lucide-react";
 import {
@@ -39,6 +39,36 @@ export function InventoryView({ inventory }: InventoryViewProps) {
       value: op.count,
     }));
   }, [topOperations]);
+
+  // Size guards to avoid Recharts width/height -1 warnings
+  const pieRef = useRef<HTMLDivElement | null>(null);
+  const barRef = useRef<HTMLDivElement | null>(null);
+  const [pieReady, setPieReady] = useState(false);
+  const [barReady, setBarReady] = useState(false);
+
+  useEffect(() => {
+    const observers: ResizeObserver[] = [];
+
+    if (pieRef.current) {
+      const obs = new ResizeObserver((entries) => {
+        const { width, height } = entries[0].contentRect;
+        setPieReady(width > 0 && height > 0);
+      });
+      obs.observe(pieRef.current);
+      observers.push(obs);
+    }
+
+    if (barRef.current) {
+      const obs = new ResizeObserver((entries) => {
+        const { width, height } = entries[0].contentRect;
+        setBarReady(width > 0 && height > 0);
+      });
+      obs.observe(barRef.current);
+      observers.push(obs);
+    }
+
+    return () => observers.forEach((o) => o.disconnect());
+  }, []);
 
   if (inventory.totalRejections === 0) {
     return (
@@ -79,54 +109,62 @@ export function InventoryView({ inventory }: InventoryViewProps) {
         {/* Pie Chart - By Operation */}
         {pieData.length > 0 && (
           <ChartContainer title="By Operation Type" height={280}>
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) =>
-                    (percent ?? 0) > 0.05 ? `${name} (${((percent ?? 0) * 100).toFixed(0)}%)` : ""
-                  }
-                  outerRadius={80}
-                  dataKey="value"
-                >
-                  {pieData.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#18181b",
-                    border: "1px solid #3f3f46",
-                    borderRadius: "8px",
-                  }}
-                />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
+            <div ref={pieRef} className="w-full h-full min-h-[240px]">
+              {pieReady && (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={pieData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) =>
+                        (percent ?? 0) > 0.05 ? `${name} (${((percent ?? 0) * 100).toFixed(0)}%)` : ""
+                      }
+                      outerRadius={80}
+                      dataKey="value"
+                    >
+                      {pieData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#18181b",
+                        border: "1px solid #3f3f46",
+                        borderRadius: "8px",
+                      }}
+                    />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
+            </div>
           </ChartContainer>
         )}
 
         {/* Bar Chart - By Error Code */}
         {topCodes.length > 0 && (
           <ChartContainer title="By Error Code" height={280}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={topCodes} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
-                <XAxis dataKey="code" stroke="#71717a" tick={{ fontSize: 11 }} />
-                <YAxis stroke="#71717a" />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#18181b",
-                    border: "1px solid #3f3f46",
-                    borderRadius: "8px",
-                  }}
-                />
-                <Bar dataKey="count" fill="#f59e0b" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <div ref={barRef} className="w-full h-full min-h-[240px]">
+              {barReady && (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={topCodes} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                    <XAxis dataKey="code" stroke="#71717a" tick={{ fontSize: 11 }} />
+                    <YAxis stroke="#71717a" />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#18181b",
+                        border: "1px solid #3f3f46",
+                        borderRadius: "8px",
+                      }}
+                    />
+                    <Bar dataKey="count" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </div>
           </ChartContainer>
         )}
       </div>

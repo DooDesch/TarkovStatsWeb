@@ -11,7 +11,7 @@ export type {
   ParsedLogResult,
   LogParser,
   GameDataProvider,
-  
+
   // Specific event types
   ApplicationLogEvent,
   BackendLogEvent,
@@ -46,6 +46,14 @@ export type {
   InsightsOptions,
   ParsedInput,
 } from "tarkov-logs-lib/browser";
+
+// Additional type-only re-exports not exposed via the browser bundle
+export type {
+  NotificationMemberInfo,
+  NotificationRaidSettings,
+  NotificationPayload,
+  LogLevel,
+} from "tarkov-logs-lib";
 
 // Re-export analytics types
 export type {
@@ -145,4 +153,11 @@ export interface ImportProgress {
 export type ExportFormat = "json" | "csv";
 
 /** Export scope options */
-export type ExportScope = "all" | "insights" | "sessions" | "errors" | "quests" | "network" | "inventory";
+export type ExportScope =
+  | "all"
+  | "insights"
+  | "sessions"
+  | "errors"
+  | "quests"
+  | "network"
+  | "inventory";

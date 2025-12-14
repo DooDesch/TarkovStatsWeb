@@ -7,6 +7,7 @@ export {
   // Selectors
   selectParsedResults,
   selectInsights,
+  selectStatistics,
   selectImportProgress,
   selectActiveTab,
   selectSidebarCollapsed,
@@ -24,6 +25,7 @@ export {
   useActiveTab,
   useSetActiveTab,
   useInsights,
+  useStatistics,
   useParsedResults,
   useImportProgress,
   useSetImportProgress,

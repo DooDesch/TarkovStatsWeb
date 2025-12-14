@@ -14,14 +14,16 @@ import {
   Legend,
 } from "recharts";
 import { StatCard, Card, EmptyState, ChartContainer, Progress } from "@/components/ui";
-import type { ConnectivityInsight } from "@/lib/logs/types";
+import type { ConnectivityInsight, NetworkStats } from "@/lib/logs/types";
 import { getConnectionSuccessRate, getTopAddresses } from "@/lib/logs/selectors";
 
 export interface NetworkViewProps {
   connectivity: ConnectivityInsight;
+  /** Optional network statistics with additional metrics (RTT, packet loss) */
+  networkStats?: NetworkStats;
 }
 
-export function NetworkView({ connectivity }: NetworkViewProps) {
+export function NetworkView({ connectivity, networkStats }: NetworkViewProps) {
   const successRate = useMemo(() => getConnectionSuccessRate(connectivity), [connectivity]);
   const topAddresses = useMemo(() => getTopAddresses(connectivity, 15), [connectivity]);
 
@@ -35,6 +37,12 @@ export function NetworkView({ connectivity }: NetworkViewProps) {
   }, [topAddresses]);
 
   const isEmpty = connectivity.totalConnections === 0 && connectivity.totalTimeouts === 0;
+  
+  const hasMetrics = networkStats?.metrics && (
+    networkStats.metrics.rttAvg !== undefined ||
+    networkStats.metrics.rpiAvg !== undefined ||
+    networkStats.metrics.totalPacketsLost !== undefined
+  );
 
   if (isEmpty) {
     return (
@@ -84,38 +92,105 @@ export function NetworkView({ connectivity }: NetworkViewProps) {
         </Card>
       )}
 
+      {/* Network Quality Metrics */}
+      {hasMetrics && networkStats?.metrics && (
+        <Card variant="glass">
+          <h3 className="text-lg font-medium text-zinc-200 mb-4">Network Quality Metrics</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {networkStats.metrics.rttAvg !== undefined && (
+              <div className="rounded-lg bg-zinc-800/50 p-3 border border-zinc-700/30">
+                <div className="text-xs text-zinc-500 mb-1">Avg RTT</div>
+                <div className={`text-lg font-semibold ${networkStats.metrics.rttAvg < 100 ? "text-emerald-400" : networkStats.metrics.rttAvg < 200 ? "text-amber-400" : "text-red-400"}`}>
+                  {networkStats.metrics.rttAvg.toFixed(1)}ms
+                </div>
+              </div>
+            )}
+            {networkStats.metrics.rpiAvg !== undefined && (
+              <div className="rounded-lg bg-zinc-800/50 p-3 border border-zinc-700/30">
+                <div className="text-xs text-zinc-500 mb-1">Avg RPI</div>
+                <div className="text-lg font-semibold text-zinc-200">
+                  {networkStats.metrics.rpiAvg.toFixed(1)}
+                </div>
+              </div>
+            )}
+            {networkStats.metrics.ludAvg !== undefined && (
+              <div className="rounded-lg bg-zinc-800/50 p-3 border border-zinc-700/30">
+                <div className="text-xs text-zinc-500 mb-1">Avg LUD</div>
+                <div className="text-lg font-semibold text-zinc-200">
+                  {networkStats.metrics.ludAvg.toFixed(1)}
+                </div>
+              </div>
+            )}
+            {networkStats.metrics.totalPacketsLost !== undefined && (
+              <div className="rounded-lg bg-zinc-800/50 p-3 border border-zinc-700/30">
+                <div className="text-xs text-zinc-500 mb-1">Packets Lost</div>
+                <div className={`text-lg font-semibold ${networkStats.metrics.totalPacketsLost === 0 ? "text-emerald-400" : networkStats.metrics.totalPacketsLost < 100 ? "text-amber-400" : "text-red-400"}`}>
+                  {networkStats.metrics.totalPacketsLost.toLocaleString()}
+                </div>
+              </div>
+            )}
+            {networkStats.metrics.totalPacketsSent !== undefined && (
+              <div className="rounded-lg bg-zinc-800/50 p-3 border border-zinc-700/30">
+                <div className="text-xs text-zinc-500 mb-1">Packets Sent</div>
+                <div className="text-lg font-semibold text-zinc-200">
+                  {networkStats.metrics.totalPacketsSent.toLocaleString()}
+                </div>
+              </div>
+            )}
+            {networkStats.metrics.totalPacketsReceived !== undefined && (
+              <div className="rounded-lg bg-zinc-800/50 p-3 border border-zinc-700/30">
+                <div className="text-xs text-zinc-500 mb-1">Packets Received</div>
+                <div className="text-lg font-semibold text-zinc-200">
+                  {networkStats.metrics.totalPacketsReceived.toLocaleString()}
+                </div>
+              </div>
+            )}
+            {networkStats.metrics.samples > 0 && (
+              <div className="rounded-lg bg-zinc-800/50 p-3 border border-zinc-700/30">
+                <div className="text-xs text-zinc-500 mb-1">Metric Samples</div>
+                <div className="text-lg font-semibold text-zinc-200">
+                  {networkStats.metrics.samples.toLocaleString()}
+                </div>
+              </div>
+            )}
+          </div>
+        </Card>
+      )}
+
       {/* Chart */}
       {chartData.length > 0 && (
         <ChartContainer title="Connections by Address" height={400}>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={chartData}
-              layout="vertical"
-              margin={{ top: 5, right: 30, left: 130, bottom: 5 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
-              <XAxis type="number" stroke="#71717a" />
-              <YAxis
-                type="category"
-                dataKey="address"
-                stroke="#71717a"
-                width={120}
-                tick={{ fontSize: 11 }}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#18181b",
-                  border: "1px solid #3f3f46",
-                  borderRadius: "8px",
-                }}
-                formatter={(value, name) => [value, name === "connections" ? "Connections" : "Timeouts"]}
-                labelFormatter={(_, payload) => payload?.[0]?.payload?.fullAddress || ""}
-              />
-              <Legend />
-              <Bar dataKey="connections" fill="#22c55e" radius={[0, 4, 4, 0]} name="Connections" />
-              <Bar dataKey="timeouts" fill="#ef4444" radius={[0, 4, 4, 0]} name="Timeouts" />
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="w-full h-full min-h-[260px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={chartData}
+                layout="vertical"
+                margin={{ top: 5, right: 30, left: 130, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                <XAxis type="number" stroke="#71717a" />
+                <YAxis
+                  type="category"
+                  dataKey="address"
+                  stroke="#71717a"
+                  width={120}
+                  tick={{ fontSize: 11 }}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#18181b",
+                    border: "1px solid #3f3f46",
+                    borderRadius: "8px",
+                  }}
+                  formatter={(value, name) => [value, name === "connections" ? "Connections" : "Timeouts"]}
+                  labelFormatter={(_, payload) => payload?.[0]?.payload?.fullAddress || ""}
+                />
+                <Legend />
+                <Bar dataKey="connections" fill="#22c55e" radius={[0, 4, 4, 0]} name="Connections" />
+                <Bar dataKey="timeouts" fill="#ef4444" radius={[0, 4, 4, 0]} name="Timeouts" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </ChartContainer>
       )}
 

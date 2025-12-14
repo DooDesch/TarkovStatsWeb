@@ -8,19 +8,20 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import type {
   ParsedLogResult,
   Insights,
+  Statistics,
   ImportProgress,
   SessionFilter,
   ErrorFilter,
   QuestFilter,
   NetworkFilter,
 } from "@/lib/logs/types";
-import { emptyInsights } from "@/lib/logs/fixtures";
+import { emptyInsights, emptyStatistics } from "@/lib/logs/fixtures";
 
 // ============================================================================
 // Types
 // ============================================================================
 
-export type TabId = "overview" | "sessions" | "errors" | "inventory" | "network" | "matching" | "quests" | "raw";
+export type TabId = "overview" | "sessions" | "errors" | "inventory" | "network" | "matching" | "quests" | "backend" | "audio" | "raw";
 
 export interface UIState {
   activeTab: TabId;
@@ -42,6 +43,7 @@ export interface FilterState {
 export interface DataState {
   parsedResults: ParsedLogResult[];
   insights: Insights;
+  statistics: Statistics;
   importProgress: ImportProgress;
 }
 
@@ -54,6 +56,7 @@ export interface StoreState extends UIState, FilterState, DataState {
   // Data Actions
   setParsedResults: (results: ParsedLogResult[]) => void;
   setInsights: (insights: Insights) => void;
+  setStatistics: (statistics: Statistics) => void;
   setImportProgress: (progress: ImportProgress) => void;
   clearData: () => void;
 
@@ -104,6 +107,7 @@ export const useStore = create<StoreState>()(
       // Initial Data State
       parsedResults: [],
       insights: emptyInsights,
+      statistics: emptyStatistics,
       importProgress: initialImportProgress,
 
       // UI Actions
@@ -114,11 +118,13 @@ export const useStore = create<StoreState>()(
       // Data Actions
       setParsedResults: (results) => set({ parsedResults: results }),
       setInsights: (insights) => set({ insights }),
+      setStatistics: (statistics) => set({ statistics }),
       setImportProgress: (progress) => set({ importProgress: progress }),
       clearData: () =>
         set({
           parsedResults: [],
           insights: emptyInsights,
+          statistics: emptyStatistics,
           importProgress: initialImportProgress,
         }),
 
@@ -166,6 +172,7 @@ export const useStore = create<StoreState>()(
 // Data selectors
 export const selectParsedResults = (state: StoreState) => state.parsedResults;
 export const selectInsights = (state: StoreState) => state.insights;
+export const selectStatistics = (state: StoreState) => state.statistics;
 export const selectImportProgress = (state: StoreState) => state.importProgress;
 
 // UI selectors
@@ -199,6 +206,7 @@ export const useActiveTab = () => useStore((state) => state.activeTab);
 export const useSetActiveTab = () => useStore((state) => state.setActiveTab);
 
 export const useInsights = () => useStore((state) => state.insights);
+export const useStatistics = () => useStore((state) => state.statistics);
 export const useParsedResults = () => useStore((state) => state.parsedResults);
 
 export const useImportProgress = () => useStore((state) => state.importProgress);

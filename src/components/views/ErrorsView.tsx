@@ -72,36 +72,38 @@ export function ErrorsView({ errors }: ErrorsViewProps) {
       {/* Chart */}
       {topFamilies.length > 0 && (
         <ChartContainer title="Errors by Family" height={400}>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={topFamilies}
-              layout="vertical"
-              margin={{ top: 5, right: 30, left: 120, bottom: 5 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
-              <XAxis type="number" stroke="#71717a" tick={{ fontSize: 12 }} />
-              <YAxis
-                type="category"
-                dataKey="family"
-                stroke="#71717a"
-                width={110}
-                tick={{ fontSize: 11 }}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#18181b",
-                  border: "1px solid #3f3f46",
-                  borderRadius: "8px",
-                }}
-                labelStyle={{ color: "#fafafa" }}
-              />
-              <Bar dataKey="count" radius={[0, 4, 4, 0]}>
-                {topFamilies.map((_, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="w-full h-full min-h-[260px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={topFamilies}
+                layout="vertical"
+                margin={{ top: 5, right: 30, left: 120, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                <XAxis type="number" stroke="#71717a" tick={{ fontSize: 12 }} />
+                <YAxis
+                  type="category"
+                  dataKey="family"
+                  stroke="#71717a"
+                  width={110}
+                  tick={{ fontSize: 11 }}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#18181b",
+                    border: "1px solid #3f3f46",
+                    borderRadius: "8px",
+                  }}
+                  labelStyle={{ color: "#fafafa" }}
+                />
+                <Bar dataKey="count" radius={[0, 4, 4, 0]}>
+                  {topFamilies.map((_, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </ChartContainer>
       )}
 
